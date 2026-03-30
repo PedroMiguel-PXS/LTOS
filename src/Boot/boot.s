@@ -20,8 +20,11 @@ stack_top:
 
 section .text
 global _start:function
+; critical part
 _start:
     mov esp, stack_top
+    push ebx
+    push eax
     extern kernel_main
     call kernel_main
     cli

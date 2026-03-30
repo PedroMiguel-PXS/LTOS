@@ -13,7 +13,18 @@ OBJ_DIR = src/objects
 BUILD_DIR = build
 
 # final object files
-OBJS = $(OBJ_DIR)/boot.o $(OBJ_DIR)/kernel.o $(OBJ_DIR)/gui.o $(OBJ_DIR)/wc.o $(OBJ_DIR)/ttt.o $(OBJ_DIR)/msche.o $(OBJ_DIR)/mtask.o $(OBJ_DIR)/eye.o $(OBJ_DIR)/shell.o
+# lets broke lines
+OBJS = $(OBJ_DIR)/boot.o \
+       $(OBJ_DIR)/kernel.o \
+       $(OBJ_DIR)/gui.o \
+       $(OBJ_DIR)/wc.o \
+       $(OBJ_DIR)/ttt.o \
+       $(OBJ_DIR)/msche.o \
+       $(OBJ_DIR)/mtask.o \
+       $(OBJ_DIR)/eye.o \
+       $(OBJ_DIR)/shell.o \
+	   $(OBJ_DIR)/bin_runner.o \
+	   $(OBJ_DIR)/file_manager_fat16.o
 
 all: $(BUILD_DIR)/ltos1.bin
 
@@ -57,8 +68,15 @@ $(OBJ_DIR)/eye.o: src/window_creator/Apps/eye_effect.c
 $(OBJ_DIR)/shell.o: src/window_creator/Apps/shell_app.c
 	$(CC) $(CFLAGS) -c src/window_creator/Apps/shell_app.c -o $(OBJ_DIR)/shell.o
 
+# rule to compile the bin runner
+$(OBJ_DIR)/bin_runner.o: src/BINRUNNER/bin_runner.c
+	$(CC) $(CFLAGS) -c src/BINRUNNER/bin_runner.c -o $(OBJ_DIR)/bin_runner.o
+
+# rule to compile the file manager
+$(OBJ_DIR)/file_manager_fat16.o: src/FAT16_WRITE_AND_READ_SYS/file_manager_fat16.c
+	$(CC) $(CFLAGS) -c src/FAT16_WRITE_AND_READ_SYS/file_manager_fat16.c -o $(OBJ_DIR)/file_manager_fat16.o
+
 run: all
-	# its -kernel, bc this is .bin, not .iso or .img
 	qemu-system-i386 -usb -device usb-tablet -kernel $(BUILD_DIR)/ltos1.bin
 
 clean:

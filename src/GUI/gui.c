@@ -3,22 +3,24 @@
 #include <stdbool.h>
 
 // mouse bitmap
-static unsigned char cursor_bmp[8] = {
-    0b10000000, // *
-    0b11000000, // **
-    0b11100000, // ***
-    0b11110000, // ****
-    0b11111000, // *****
-    0b11100000, // ****
-    0b10100000, //   *
-    0b00010000  //    *
+static unsigned char cursor_bmp[10] = {
+    0b100000000, // *
+    0b110000000, // **
+    0b111000000, // ***
+    0b111100000, // ****
+    0b111110000, // *****
+    0b111010000, // *** *
+    0b100100000, // *   *
+    0b000110000, //    **
+    0b000010000, //     *
+    0b000000000  //
 };
 
 extern void putpixel(int x, int y, uint32_t color);
 
 void draw_cursor(int px, int py, int clicked) {
-    uint32_t color = clicked ? 0x00FF4444 : 0x00FFFFFF;
-    for (int row = 0; row < 8; row++) {
+    uint32_t color = clicked ? 0x00444444 : 0x00000000;
+    for (int row = 0; row < 10; row++) {
         for (int col = 0; col < 8; col++) {
             if (cursor_bmp[row] & (1 << (7 - col))) {
                 putpixel(px + col, py + row, color);
@@ -81,8 +83,8 @@ static int get_win_h(int type) {
 
 // helper to draw icons on desktop
 void draw_icon(int x, int y, char sym, uint8_t col, const char* name) {
-    terminal_putentryat(sym, col | 8 << 4, x, y); // Icon on Grey bg
-    for(int i=0; name[i]; i++) terminal_putentryat(name[i], 15 | 8 << 4, x-1+i, y+1);
+    terminal_putentryat(sym, col | 1 << 4, x, y); // azul ao invés de cinza
+    for(int i=0; name[i]; i++) terminal_putentryat(name[i], 15 | 1 << 4, x-1+i, y+1);
 }
 
 // IO funcs
@@ -206,7 +208,7 @@ void draw_clock() {
     // Fuse hour (GMT-3 Brazil)
     hours = (hours + 21) % 24;
 
-    uint8_t clock_color = 15 | 8 << 4;
+    uint8_t clock_color = 15 | 1 << 4; // azul
     char time_str[9];
     time_str[0] = (hours / 10) + '0';
     time_str[1] = (hours % 10) + '0';
@@ -223,20 +225,48 @@ void draw_clock() {
         terminal_putentryat(time_str[i], clock_color, 114 + i, 88);
     }
 }
+// wallpaper
+// its draw_moon, but we will use draw_wallpaper
+// we will change func to draw_wallapaper
+void draw_moon(int cx, int cy, int radius) {
+    uint32_t moon_color = 0xEEEECCAA; // Branco Lunar suave
+    uint32_t crater_color = 0xCCCCCCAA; // Cinza para crateras
+    // draw the moon
+    for (int y = -radius; y <= radius; y++) {
+        for (int x = -radius; x <= radius; x++) {
+            if (x * x + y * y <= radius * radius) {
+                if (((x ^ y) % 9 == 0) && (x * x + y * y < (radius-5) * (radius-5)))
+                    putpixel(cx + x, cy + y, crater_color);
+                else 
+                    putpixel(cx + x, cy + y, moon_color);
+            }
+        }
+    }
+}
+// draw_wallpaper func
+void draw_wallpaper() {
+    uint8_t blue_bg = 1 << 4 | 15;
+    for (int i = 0; i < 128 * 90; i++)
+        terminal_putentryat(' ', blue_bg, i % 128, i / 128);
+    draw_moon(512, 360, 45);
+}
+
 void start_gui() {
     set_bga_resolution();
     mouse_init();
     uint8_t last_mouse_btn = 0;
-    // paint the background of grey (8) with white text (15)
-    uint8_t blue_bg = 8 << 4 | 15;
-    for (int i = 0; i < 128 * 90; i++)
-    terminal_putentryat(' ', blue_bg, i % 128, i / 128);
+    // we will use this uint8_t to draw the wallpaper
+    uint8_t blue_bg = 1 << 4 | 15;
+    draw_wallpaper();
 
     bool is_dragging = false;
     int offset_x = 0, offset_y = 0;
     int dragging_win = -1;
 
     while(1) {
+        // lets define mx and my
+        int mx = mouse_x / 8;
+        int my = mouse_y / 8;
         // 0. DESKTOP ICONS
         draw_icon(5, 5, '#', 14, "NoteX");
         draw_icon(15, 5, 'X', 14, "TicTacToe");
@@ -297,15 +327,13 @@ void start_gui() {
 
         // 2. MOUSE
         mouse_handler();
-        int mx = mouse_x / 8;
-        int my = mouse_y / 8;
         draw_clock();
         // --- RESET BUTTON (bottom-right) ---
-        terminal_putentryat('[', 12 | 8 << 4, 123, 88);
-        terminal_putentryat('R', 12 | 8 << 4, 124, 88);
-        terminal_putentryat('S', 12 | 8 << 4, 125, 88);
-        terminal_putentryat('T', 12 | 8 << 4, 126, 88);
-        terminal_putentryat(']', 12 | 8 << 4, 127, 88);
+        terminal_putentryat('[', 12 | 1 << 4, 123, 88);
+        terminal_putentryat('R', 12 | 1 << 4, 124, 88);
+        terminal_putentryat('S', 12 | 1 << 4, 125, 88);
+        terminal_putentryat('T', 12 | 1 << 4, 126, 88);
+        terminal_putentryat(']', 12 | 1 << 4, 127, 88);
 
         // --- LOGIC: CLICK TO FOCUS & OPEN ---
         if ((mouse_byte[0] & 0x01) && !(last_mouse_btn & 0x01)) {
@@ -314,8 +342,7 @@ void start_gui() {
             if (mx >= 123 && mx <= 127 && my == 88) {
                 mtask_reset();
                 // repaint the entire backgroud
-                for (int i = 0; i < 128 * 90; i++)
-                    terminal_putentryat(' ', blue_bg, i % 128, i / 128);
+                draw_wallpaper();
                 // redraw icons
                 draw_icon(5, 5, '#', 14, "NoteX");
                 draw_icon(15, 5, 2, 10, "TicTacToe");
@@ -357,6 +384,8 @@ void start_gui() {
                     for (int wy = 0; wy < wh; wy++)
                         for (int wx = 0; wx < ww; wx++)
                             terminal_putentryat(' ', blue_bg, windows[i].x + wx, windows[i].y + wy);
+                    // Redesenha a lua se a janela fechada estava por cima dela
+                    if (windows[i].x < 70 && windows[i].x + w > 58) draw_moon(512, 360, 45);
                     mtask_close(i);
                 }
             }
@@ -395,6 +424,7 @@ void start_gui() {
             if (windows[dragging_win].x != (mx - offset_x) || windows[dragging_win].y != (my - offset_y)) {
                 for (int i = 0; i < 128 * 90; i++)
                     terminal_putentryat(' ', blue_bg, i % 128, i / 128);
+                draw_moon(512, 360, 45);
                 windows[dragging_win].x = mx - offset_x;
                 windows[dragging_win].y = my - offset_y;
             }
@@ -405,9 +435,12 @@ void start_gui() {
         if (mouse_x != old_mouse_x || mouse_y != old_mouse_y || (mouse_byte[0] & 0x07)) {
             int old_cx = old_mouse_x / 8;
             int old_cy = old_mouse_y / 8;
-            for(int y=0; y<2; y++)
-            for (int x=0; x<2; x++)
-            terminal_putentryat(' ', blue_bg, old_cx + x, old_cy + y);
+            for(int y=0; y<3; y++)
+            for (int x=0; x<3; x++)
+                terminal_putentryat(' ', blue_bg, old_cx + x, old_cy + y);
+            // Redesenha a lua se o mouse limpou um pedaço dela
+            if (old_cx >= 52 && old_cx <= 76 && old_cy >= 35 && old_cy <= 55)
+                draw_moon(512, 360, 45);
             for (int i = 0; i < 10; i++) {
                 if (windows[i].open) {
                     if (windows[i].type == WIN_NOTEPAD)

@@ -357,7 +357,7 @@ void vga_set_mode_13h() {
     outb(0x3C0, 0x20); // Enable display
 }
 
-void kernel_main(void) {
+void kernel_main(uint32_t magic, void* mb_info) {
     set_bga_resolution();
     terminal_initialize();
     terminal_print_logo();
