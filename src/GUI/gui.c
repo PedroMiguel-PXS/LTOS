@@ -48,6 +48,7 @@ extern void mtask_close(int id);
 extern void mtask_focus(int id);
 extern void draw_eyes(int x, int y);
 extern void draw_shell_window(int x, int y, int w, int h);
+extern void draw_paint(int x, int y);
 extern void gui_shell_execute(int x, int y, char* cmd);
 extern int active_window;
 extern int window_count;
@@ -63,6 +64,7 @@ extern Window windows[10];
 #define WIN_TTT 2
 #define WIN_EYES 3
 #define WIN_SHELL 4
+#define WIN_PAINT 5
 
 // helper to get window size based on type
 static int get_win_w(int type) {
@@ -70,6 +72,7 @@ static int get_win_w(int type) {
     if (type == WIN_TTT) return 13;
     if (type == WIN_EYES) return 16;
     if (type == WIN_SHELL) return 30;
+    if (type == WIN_PAINT) return 30;
     return 20;
 }
 
@@ -78,6 +81,7 @@ static int get_win_h(int type) {
     if (type == WIN_TTT) return 8;
     if (type == WIN_EYES) return 10;
     if (type == WIN_SHELL) return 8;
+    if (type == WIN_PAINT) return 20;
     return 10;
 }
 
@@ -274,6 +278,7 @@ void start_gui() {
         // shell icon, but i will add kernel's shell later
         // lets stay with a horizontal bar
         draw_icon(39, 5, '>', 14, "Shell");
+        draw_icon(48, 5, '@', 13, "Paint");
 
         // 1. KEYBOARD (Non-blocking)
         if (inb(0x64) & 0x01) {
@@ -360,6 +365,10 @@ void start_gui() {
             // Click on Shell Icon -> open new window
             if (mx >= 38 && mx <= 40 && my == 5)
                 mtask_open(WIN_SHELL);
+
+            // Click on Paint Icon
+            if (mx >= 47 && mx <= 49 && my == 5)
+                mtask_open(WIN_PAINT);
 
             // Click on Eyes Icon -> open new window
             // lets patch this
@@ -451,6 +460,8 @@ void start_gui() {
                 draw_eyes(windows[i].x, windows[i].y);
                 if (windows[i].type == WIN_SHELL)
                 draw_shell_window(windows[i].x, windows[i].y, 30, 8);
+                if (windows[i].type == WIN_PAINT)
+                draw_paint(windows[i].x, windows[i].y);
                 }
             }
             old_mouse_x = mouse_x;

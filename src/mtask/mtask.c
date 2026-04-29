@@ -7,6 +7,7 @@
 #define MAX_WINDOWS 10
 #define WIN_NOTEPAD 1
 #define WIN_TTT 2
+#define WIN_PAINT 5
 
 typedef struct {
     int type;

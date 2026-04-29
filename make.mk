@@ -24,7 +24,8 @@ OBJS = $(OBJ_DIR)/boot.o \
        $(OBJ_DIR)/eye.o \
        $(OBJ_DIR)/shell.o \
 	   $(OBJ_DIR)/bin_runner.o \
-	   $(OBJ_DIR)/file_manager_fat16.o
+	   $(OBJ_DIR)/file_manager_fat16.o \
+	   $(OBJ_DIR)/paint.o
 
 all: $(BUILD_DIR)/ltos1.bin
 
@@ -75,6 +76,10 @@ $(OBJ_DIR)/bin_runner.o: src/BINRUNNER/bin_runner.c
 # rule to compile the file manager
 $(OBJ_DIR)/file_manager_fat16.o: src/FAT16_WRITE_AND_READ_SYS/file_manager_fat16.c
 	$(CC) $(CFLAGS) -c src/FAT16_WRITE_AND_READ_SYS/file_manager_fat16.c -o $(OBJ_DIR)/file_manager_fat16.o
+
+# rule to compile the paint app
+$(OBJ_DIR)/paint.o: src/window_creator/Apps/paint.c
+	$(CC) $(CFLAGS) -c src/window_creator/Apps/paint.c -o $(OBJ_DIR)/paint.o
 
 run: all
 	qemu-system-i386 -usb -device usb-tablet -kernel $(BUILD_DIR)/ltos1.bin
