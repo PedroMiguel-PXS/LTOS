@@ -25,7 +25,8 @@ OBJS = $(OBJ_DIR)/boot.o \
        $(OBJ_DIR)/shell.o \
 	   $(OBJ_DIR)/bin_runner.o \
 	   $(OBJ_DIR)/file_manager_fat16.o \
-	   $(OBJ_DIR)/paint.o
+	   $(OBJ_DIR)/paint.o \
+	   $(OBJ_DIR)/fbootloading.o
 
 all: $(BUILD_DIR)/ltos1.bin
 
@@ -80,6 +81,10 @@ $(OBJ_DIR)/file_manager_fat16.o: src/FAT16_WRITE_AND_READ_SYS/file_manager_fat16
 # rule to compile the paint app
 $(OBJ_DIR)/paint.o: src/window_creator/Apps/paint.c
 	$(CC) $(CFLAGS) -c src/window_creator/Apps/paint.c -o $(OBJ_DIR)/paint.o
+
+# rule to compile the fake bootloading
+$(OBJ_DIR)/fbootloading.o: src/BootSrc/fbootloading.c
+	$(CC) $(CFLAGS) -c src/BootSrc/fbootloading.c -o $(OBJ_DIR)/fbootloading.o
 
 run: all
 	qemu-system-i386 -usb -device usb-tablet -kernel $(BUILD_DIR)/ltos1.bin

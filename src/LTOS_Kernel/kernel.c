@@ -359,6 +359,8 @@ void vga_set_mode_13h() {
 
 void kernel_main(uint32_t magic, void* mb_info) {
     set_bga_resolution();
+    extern void start_floading();
+    start_floading();
     terminal_initialize();
     terminal_print_logo();
     terminal_writestring("\n - system booted: ok\n");
