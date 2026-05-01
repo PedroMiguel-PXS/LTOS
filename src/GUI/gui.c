@@ -41,6 +41,7 @@ extern void terminal_initialize();
 extern char scancode_to_ascii(uint8_t scancode);
 extern void draw_notepad(int x, int y, int w, int h); // from WC_func.c
 extern void draw_tictactoe(int x, int y); // from tictactoe.c
+extern void ttt_reset();
 extern void ltos_switch_focus(int win_id); // from msche.c
 extern int current_focus;
 extern void mtask_reset();
@@ -346,6 +347,8 @@ void start_gui() {
             // RESET button click
             if (mx >= 123 && mx <= 127 && my == 88) {
                 mtask_reset();
+                // reset tictactoe
+                ttt_reset();
                 // repaint the entire backgroud
                 draw_wallpaper();
                 // redraw icons
@@ -403,12 +406,16 @@ void start_gui() {
             // Tic-Tac-Toe cell click
             if (active_window >= 0 && windows[active_window].open && windows[active_window].type == WIN_TTT) {
                 extern int board[3][3];
+                extern int ttt_turn;
                 int tx = windows[active_window].x;
                 int ty = windows[active_window].y;
                 for (int r = 0; r < 3; r++) {
                     for (int c = 0; c < 3; c++) {
                         if (mx == tx + 2 + (c*4) && my == ty + 2 + (r*2))
-                            if (board[r][c] == 0) board[r][c] = 1;
+                            if (board[r][c] == 0) {
+                                board[r][c] = ttt_turn;
+                                ttt_turn = (ttt_turn == 1) ? 2 : 1;
+                            }
                     }
                 }
             }

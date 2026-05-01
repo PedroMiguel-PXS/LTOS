@@ -44,7 +44,7 @@ enum vga_color {
 	VGA_COLOR_LIGHT_CYAN = 11,
 	VGA_COLOR_LIGHT_RED = 12,
 	VGA_COLOR_LIGHT_MAGENTA = 13,
-	VGA_COLOR_LIGHT_BROWN = 14,
+	VGA_COLOR_YELLOW = 14,
 	VGA_COLOR_WHITE = 15,
 };
 
@@ -158,7 +158,7 @@ static uint32_t vga_to_rgb(uint8_t vga_color) {
         0x00FF5555, // 12: Light Red
         0x00FF55FF, // 13: Light Magenta
         0x00FFFF55, // 14: Yellow
-        0x00FFFFFF  // 15: White
+        0x00FFFFFF, // 15: White
     };
     return palette[vga_color & 0x0F];
 }
@@ -220,17 +220,19 @@ void terminal_write(const char* data, size_t size) {
 void terminal_writestring(const char* str) {
     terminal_write(str, strlen(str));
 }
+// the new ltos pizza edition
 void terminal_print_logo(void) {
-    terminal_setcolor(vga_entry_color(VGA_COLOR_LIGHT_MAGENTA, VGA_COLOR_BLACK));
-    terminal_writestring("                 \n");
-    terminal_writestring("            _.._\n");
-    terminal_writestring("         .' .-'` \n");
-    terminal_writestring("        /  /     \n");
-    terminal_writestring("        |  |     \n");
-    terminal_writestring("        \\  \\     \n");
-    terminal_writestring("         '._'-._ \n");
-    terminal_writestring("            ```  \n");
-    terminal_writestring("       LTOS MOON EDITION\n");
+    terminal_setcolor(vga_entry_color(VGA_COLOR_YELLOW, VGA_COLOR_BLACK));
+    terminal_writestring("      _________________   \n");
+    terminal_writestring("      \\_  _  _  _  _  _/ \n");
+    terminal_writestring("        \\  o      o  /   \n");
+    terminal_writestring("         \\     o    /    \n");
+    terminal_writestring("          \\  o     /     \n");
+    terminal_writestring("           \\    o /      \n");
+    terminal_writestring("            \\    /       \n");
+    terminal_writestring("             \\  /        \n");
+    terminal_writestring("              \\/         \n");
+    terminal_writestring("     LTOS PIZZA EDITION   \n");
     terminal_setcolor(vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK));
 }
 // waiter function to wait for a key press

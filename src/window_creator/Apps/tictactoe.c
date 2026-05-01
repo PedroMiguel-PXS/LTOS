@@ -7,7 +7,15 @@ extern void terminal_putentryat(char c, uint8_t color, size_t x, size_t y);
 extern void draw_notepad(int x, int y, int w, int h);
 // memory of tictactoe game
 int board[3][3] = {{0,0,0}, {0,0,0}, {0,0,0}};
-
+int ttt_turn = 1;
+void ttt_reset() {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            board[i][j] = 0;
+        }
+    }
+    ttt_turn = 1;
+}
 void draw_tictactoe(int x, int y) {
     draw_notepad(x, y, 13, 8);
     // write tic-tac
