@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include "wallpaper_data.h"
 
 // mouse bitmap
 static unsigned char cursor_bmp[10] = {
@@ -229,30 +230,29 @@ void draw_clock() {
         terminal_putentryat(time_str[i], clock_color, 114 + i, 88);
     }
 }
-// wallpaper
-// its draw_moon, but we will use draw_wallpaper
-// we will change func to draw_wallapaper
-void draw_moon(int cx, int cy, int radius) {
-    uint32_t moon_color = 0xEEEECCAA; // Branco Lunar suave
-    uint32_t crater_color = 0xCCCCCCAA; // Cinza para crateras
-    // draw the moon
-    for (int y = -radius; y <= radius; y++) {
-        for (int x = -radius; x <= radius; x++) {
-            if (x * x + y * y <= radius * radius) {
-                if (((x ^ y) % 9 == 0) && (x * x + y * y < (radius-5) * (radius-5)))
-                    putpixel(cx + x, cy + y, crater_color);
-                else 
-                    putpixel(cx + x, cy + y, moon_color);
-            }
+// nyan cat drawing function
+void draw_nyan_cat(int cx, int cy) {
+    int start_x = cx - 125; // center the 250x250 image
+    int start_y = cy - 125;
+    for (int y = 0; y < 250; y++) {
+        for (int x = 0; x < 250; x++) {
+            uint32_t pixel = nyan_cat_data[y * 250 + x];
+            // 0x000000AA is our "transparent" blue background color we set during conversion
+            // we only draw if it's not the background color to avoid overwriting existing stuff if needed
+            // but for wallpaper, we draw everything!
+            putpixel(start_x + x, start_y + y, pixel);
         }
     }
 }
+
 // draw_wallpaper func
 void draw_wallpaper() {
     uint8_t blue_bg = 1 << 4 | 15;
     for (int i = 0; i < 128 * 90; i++)
         terminal_putentryat(' ', blue_bg, i % 128, i / 128);
-    draw_moon(512, 360, 45);
+    
+    // NYAN CAT TIME!
+    draw_nyan_cat(512, 360);
 }
 
 void start_gui() {
@@ -393,8 +393,9 @@ void start_gui() {
                     for (int wy = 0; wy < wh; wy++)
                         for (int wx = 0; wx < ww; wx++)
                             terminal_putentryat(' ', blue_bg, windows[i].x + wx, windows[i].y + wy);
-                    // Redesenha a lua se a janela fechada estava por cima dela
-                    if (windows[i].x < 70 && windows[i].x + w > 58) draw_moon(512, 360, 45);
+                    // Redesenha o Nyan Cat se a janela fechada estava por cima dele
+                    if (windows[i].x <= 80 && windows[i].x + w >= 48 &&
+                        windows[i].y <= 61 && windows[i].y + h >= 29) draw_nyan_cat(512, 360);
                     mtask_close(i);
                 }
             }
@@ -433,7 +434,7 @@ void start_gui() {
             if (windows[dragging_win].x != (mx - offset_x) || windows[dragging_win].y != (my - offset_y)) {
                 for (int i = 0; i < 128 * 90; i++)
                     terminal_putentryat(' ', blue_bg, i % 128, i / 128);
-                draw_moon(512, 360, 45);
+                draw_nyan_cat(512, 360);
                 windows[dragging_win].x = mx - offset_x;
                 windows[dragging_win].y = my - offset_y;
             }
@@ -447,9 +448,9 @@ void start_gui() {
             for(int y=0; y<3; y++)
             for (int x=0; x<3; x++)
                 terminal_putentryat(' ', blue_bg, old_cx + x, old_cy + y);
-            // Redesenha a lua se o mouse limpou um pedaço dela
-            if (old_cx >= 52 && old_cx <= 76 && old_cy >= 35 && old_cy <= 55)
-                draw_moon(512, 360, 45);
+            // Redesenha o Nyan Cat se o mouse limpou um pedaço dele
+            if (old_cx + 3 >= 48 && old_cx <= 80 && old_cy + 3 >= 29 && old_cy <= 61)
+                draw_nyan_cat(512, 360);
             for (int i = 0; i < 10; i++) {
                 if (windows[i].open) {
                     if (windows[i].type == WIN_NOTEPAD)
